@@ -48,6 +48,15 @@ final class MatchController
             'score' => $data['score'] ?? null,
             'next_match_id' => isset($data['next_match_id']) ? (int)$data['next_match_id'] : null,
         ]);
+
+        if (!empty($match->score)) {
+            $match->winner_player_id = self::winnerFromScore(
+                $match->score,
+                $match->player1_id,
+                $match->player2_id
+            );
+        }
+
         $match->save();
 
         Response::success($match->toArray(), 201)->send();
@@ -78,6 +87,16 @@ final class MatchController
                 $match->$key = $data[$key] !== null ? (string)$data[$key] : null;
             }
         }
+
+        // Calcola automaticamente il winner in base allo score (ignora winner_player_id inviato dal frontend)
+        if (array_key_exists('score', $data)) {
+            $match->winner_player_id = self::winnerFromScore(
+                $match->score,
+                $match->player1_id,
+                $match->player2_id
+            );
+        }
+
         $match->save();
 
         Response::success($match->toArray())->send();
@@ -92,5 +111,30 @@ final class MatchController
         \App\Database\DB::execute("UPDATE matches SET next_match_id = NULL WHERE next_match_id = ?", [$id]);
         \App\Database\DB::execute("DELETE FROM matches WHERE id = ?", [$id]);
         Response::success(["message" => "Match eliminato"])->send();
+    }
+
+        private static function winnerFromScore(?string $score, ?int $player1Id, ?int $player2Id): ?int
+    {
+        if (!$score || !$player1Id || !$player2Id) return null;
+
+        // Accetta "6-4 6-3" oppure "6-4,6-3"
+        $normalized = str_replace([',', ';'], ' ', trim($score));
+        $sets = preg_split('/\s+/', $normalized);
+
+        $p1Sets = 0;
+        $p2Sets = 0;
+
+        foreach ($sets as $set) {
+            if (!preg_match('/^(\d+)-(\d+)$/', $set, $m)) continue;
+            $a = (int)$m[1];
+            $b = (int)$m[2];
+            if ($a > $b) $p1Sets++;
+            elseif ($b > $a) $p2Sets++;
+        }
+
+        if ($p1Sets === 0 && $p2Sets === 0) return null; // score non parsabile
+        if ($p1Sets === $p2Sets) return null;             // non deciso / incompleto
+
+        return ($p1Sets > $p2Sets) ? $player1Id : $player2Id;
     }
 }

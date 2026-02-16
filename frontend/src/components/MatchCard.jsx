@@ -27,7 +27,7 @@ export default function MatchCard({ match, playerMap, onSave }) {
     const s = score.trim() || (w ? '1-0' : match.score);
     if (!w && !s) return;
     setLoading(true);
-    onSave(match.id, { score: s || '1-0', winner_player_id: w || match.winner_player_id }).finally(() => setLoading(false));
+    onSave(match.id, { score: s || '1-0' }).finally(() => setLoading(false));
   };
 
   return (
