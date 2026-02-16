@@ -3,11 +3,11 @@ import { Loader2 } from 'lucide-react';
 
 export default function MatchCard({ match, playerMap, onSave }) {
   const [score, setScore] = useState(match.score ?? '');
-  const [winnerId, setWinnerId] = useState(match.winner_player_id ?? '');
+  // const [winnerId, setWinnerId] = useState(match.winner_player_id ?? '');
 
   useEffect(() => {
     setScore(match.score ?? '');
-    setWinnerId(match.winner_player_id ?? '');
+    // setWinnerId(match.winner_player_id ?? '');
   }, [match.id, match.score, match.winner_player_id]);
   const [loading, setLoading] = useState(false);
 
@@ -21,14 +21,16 @@ export default function MatchCard({ match, playerMap, onSave }) {
   const isFinished = match.winner_player_id != null;
 
   const handleSave = (e) => {
-    e.preventDefault();
-    if (loading) return;
-    const w = winnerId ? parseInt(winnerId, 10) : null;
-    const s = score.trim() || (w ? '1-0' : match.score);
-    if (!w && !s) return;
-    setLoading(true);
-    onSave(match.id, { score: s || '1-0' }).finally(() => setLoading(false));
-  };
+  e.preventDefault();
+  if (loading) return;
+
+  const s = score.trim();
+  if (!s) return;
+
+  setLoading(true);
+  Promise.resolve(onSave(match.id, { score: s }))
+    .finally(() => setLoading(false));
+};
 
   return (
     <div
@@ -61,8 +63,16 @@ export default function MatchCard({ match, playerMap, onSave }) {
                 placeholder="es. 6-4 6-3"
                 className="w-full px-2 py-1.5 bg-slate-700 border border-slate-600 rounded text-slate-200 text-sm"
               />
+              <button
+              type="submit"
+              disabled={loading || !score.trim()}
+              className="w-full px-3 py-2 bg-violet-500 hover:bg-violet-600 disabled:opacity-50 text-slate-900 text-sm font-medium rounded transition"
+            >
+              {loading ? <Loader2 className="animate-spin inline" size={14} /> : 'Salva'}
+            </button>
             </div>
-            <div>
+            
+              {/* <div> 
               <label className="block text-xs text-slate-400 mb-0.5">Vincitore</label>
               <select
                 value={winnerId}
@@ -73,14 +83,8 @@ export default function MatchCard({ match, playerMap, onSave }) {
                 <option value={match.player1_id}>{getPlayerName(match.player1_id)}</option>
                 <option value={match.player2_id}>{getPlayerName(match.player2_id)}</option>
               </select>
-            </div>
-            <button
-              type="submit"
-              disabled={loading || !winnerId}
-              className="w-full px-3 py-2 bg-violet-500 hover:bg-violet-600 disabled:opacity-50 text-slate-900 text-sm font-medium rounded transition"
-            >
-              {loading ? <Loader2 className="animate-spin inline" size={14} /> : 'Salva'}
-            </button>
+            </div> */}
+            
           </form>
         )}
         {!hasBoth && <p className="text-slate-500 text-sm">In attesa avversari</p>}
