@@ -1,70 +1,102 @@
 # Tournament Manager
 
-Web application per la gestione di tornei sportivi a eliminazione diretta. 
+Gestione di tornei di tennis con backend PHP e frontend React.
+Il progetto permette di creare giocatori, generare tornei, inserire risultati e determinare automaticamente il vincitore finale.
 
-## Stack Tecnologico
+---
 
-- **Backend**: PHP 8+ (OOP), API REST JSON, MySQL/MariaDB
-- **Frontend**: React, Vite, Tailwind CSS, Axios
-- **Router**: SimpleRouter (Pecee)
+## Tecnologie
 
-## Requisiti
+Backend:
 
-- PHP 8.2+
-- MySQL
-- Node.js 18+
-- Composer
+* PHP (OOP)
+* SimpleRouter
+* MySQL
+* API REST JSON
 
-L'API sarà disponibile su `http://localhost:8000/api`.
+Frontend:
 
-**Test connessione DB**: `GET http://localhost:8000/api/db-test`
+* React
+* Vite
+* TailwindCSS
+* Axios
 
-Il frontend sarà disponibile su `http://localhost:5173`.
+---
 
-## Struttura progetto
+## Struttura del progetto
 
 ```
-tournament_manager/
-├── backend/
-│   ├── config/          # Configurazione (database, ecc.)
-│   ├── database/        # Schema SQL
-│   ├── public/          # Entry point (index.php)
-│   ├── routes/          # Definizione rotte API
-│   └── src/
-│       ├── Controllers/
-│       ├── Database/    # Classe DB (PDO)
-│       ├── Models/
-│       ├── Services/    # BracketService (generazione tabellone)
-│       └── Utils/
-├── frontend/
-│   └── src/
-│       ├── pages/
-│       └── api.js       # Client axios
-└── database/
-    └── schema.sql
+tournament_manager
+│
+├── backend
+│   ├── app
+│   │   ├── Controllers
+│   │   ├── Models
+│   │   ├── Database
+│   │   └── Http
+│   │
+│   ├── routes
+│   │   ├── index.php
+│   │   ├── players.php
+│   │   ├── tournaments.php
+│   │   └── matches.php
+│   │
+│   ├── config
+│   ├── public
+│   ├── composer.json
+│   └── vendor
+│
+├── frontend
+│   ├── src
+│   │   ├── api
+│   │   ├── components
+│   │   ├── pages
+│   │   ├── assets
+│   │   ├── App.jsx
+│   │   └── main.jsx
+│   │
+│   ├── index.html
+│   ├── package.json
+│   ├── tailwind.config.js
+│   └── vite.config.js
+│
+├── database
+│   └── tournament_manager_dump.sql
+│
+├── .gitignore
+└── README.md
 ```
 
-## API Endpoints
+---
 
-| Metodo | Endpoint | Descrizione |
-|--------|----------|-------------|
-| GET | `/api/db-test` | Test connessione database |
-| GET | `/api/players` | Lista partecipanti |
-| GET | `/api/players/{id}` | Dettaglio partecipante |
-| POST | `/api/players` | Crea partecipante |
-| PUT | `/api/players/{id}` | Modifica partecipante |
-| DELETE | `/api/players/{id}` | Elimina partecipante |
-| GET | `/api/tournaments` | Lista tornei |
-| GET | `/api/tournaments/{id}` | Dettaglio torneo |
-| POST | `/api/tournaments` | Crea torneo (con selezione partecipanti e generazione bracket) |
-| GET | `/api/matches` | Lista partite (opzionale: `?tournament_id=X`) |
-| GET | `/api/matches/tournament/{id}` | Partite per torneo |
-| PUT | `/api/matches/{id}` | Aggiorna risultato (winner_player_id, score) |
+## Setup Database
 
-## Funzionalità principali
+```bash
+mysql -u root -p tournament_manager < database/tournament_manager_dump.sql
+```
 
-1. **Gestione Partecipanti**: CRUD completo (crea, modifica, elimina)
-2. **Creazione Torneo**: Nome, data, luogo, selezione partecipanti (4, 8 o 16 consigliati)
-3. **Generazione Bracket**: Tabellone generato automaticamente con accoppiamenti casuali
-4. **Gestione Risultati**: Inserimento vincitore per ogni partita; avanzamento automatico alla partita successiva
-5. **Chiusura Torneo**: Quando viene inserito il risultato della finale, il torneo viene marcato come concluso
+---
+
+## Avvio Backend
+
+```bash
+cd backend
+composer install
+php -S localhost:8000 -t public
+```
+
+API:
+http://localhost:8000/api
+
+---
+
+## Avvio Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+App:
+http://localhost:5173
