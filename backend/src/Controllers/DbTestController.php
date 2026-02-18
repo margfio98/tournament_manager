@@ -5,7 +5,7 @@ use App\Database\DB;
 use App\Utils\Response;
 
 /**
- * Controller per test connessione database (SELECT 1)
+ *  test connessione database (SELECT 1)
  */
 final class DbTestController {
     public function index(): void {

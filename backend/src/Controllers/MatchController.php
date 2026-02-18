@@ -8,6 +8,7 @@ use App\Utils\Request;
 
 final class MatchController
 {
+    // lista match (tutti o filtrati per tornep)
     public function index(): void
     {
         $tournamentId = isset($_GET['tournament_id']) ? (int)$_GET['tournament_id'] : null;
@@ -17,6 +18,7 @@ final class MatchController
         Response::success(array_map(fn($m) => $m->toArray(), $matches))->send();
     }
 
+    // dettagli match
     public function show(int $id): void
     {
         $match = MatchModel::find($id);
@@ -26,19 +28,20 @@ final class MatchController
         Response::success($match->toArray())->send();
     }
 
+    // crea match POST
     public function store(): void
     {
         $data = (new Request())->json();
-
+        // controlla id
         if (empty($data['tournament_id'])) {
             Response::error("tournament_id obbligatorio", 400)->send();
         }
-
+        // controlla se torneo esiste
         $tournament = Tournament::find((int)$data['tournament_id']);
         if (!$tournament) {
             Response::error("Torneo non trovato", 404)->send();
         }
-
+        // crea
         $match = new MatchModel([
             'tournament_id' => (int)$data['tournament_id'],
             'round' => $data['round'] ?? 'Round 1',
@@ -48,7 +51,7 @@ final class MatchController
             'score' => $data['score'] ?? null,
             'next_match_id' => isset($data['next_match_id']) ? (int)$data['next_match_id'] : null,
         ]);
-
+        // calcola automaticamente vincitore se c'e punteggio. se c'e next_match promuove se final chiude
         if (!empty($match->score)) {
             $match->winner_player_id = self::winnerFromScore(
                 $match->score,
@@ -56,18 +59,20 @@ final class MatchController
                 $match->player2_id
             );
         }
-
+        // salva db
         $match->save();
 
         Response::success($match->toArray(), 201)->send();
     }
 
+    // mostra match x torneo
     public function byTournament(int $tournamentId): void
     {
         $matches = MatchModel::byTournament($tournamentId);
         Response::success(array_map(fn($m) => $m->toArray(), $matches))->send();
     }
 
+    // modifica match PUT
     public function update(int $id): void
     {
         $match = MatchModel::find($id);
@@ -102,6 +107,7 @@ final class MatchController
         Response::success($match->toArray())->send();
     }
 
+    // elimina m
     public function delete(int $id): void
     {
         $match = MatchModel::find($id);
@@ -113,6 +119,8 @@ final class MatchController
         Response::success(["message" => "Match eliminato"])->send();
     }
 
+
+    // calc vincitore
         private static function winnerFromScore(?string $score, ?int $player1Id, ?int $player2Id): ?int
     {
         if (!$score || !$player1Id || !$player2Id) return null;

@@ -2,7 +2,7 @@
 namespace App\Models;
 
 final class MatchModel extends BaseModel {
-    protected static string $table = 'matches';
+    protected static string $table = 'matches'; // static::$table nel basemodel diventa matches
 
     public static function byTournament(int $tournamentId): array {
         $rows = \App\Database\DB::select(
@@ -11,6 +11,8 @@ final class MatchModel extends BaseModel {
         );
         return array_map(fn($r) => new static($r), $rows);
     }
+
+    // prop colonne match
     public ?int $tournament_id = null;
     public ?string $round = null;
     public ?int $player1_id = null;
@@ -20,7 +22,7 @@ final class MatchModel extends BaseModel {
     public ?int $next_match_id = null;
 
     public function save(): void {
-        parent::save();
+        parent::save(); // sovrascrivi save basemodel
 
         if ($this->winner_player_id !== null) {
             // Se c'è un match successivo, sposta il vincitore
@@ -34,6 +36,7 @@ final class MatchModel extends BaseModel {
         }
     }
 
+    // sposta vincitore match successivo
     private function promoteWinner(): void {
         $next = self::find($this->next_match_id);
         if ($next) {
@@ -46,6 +49,7 @@ final class MatchModel extends BaseModel {
         }
     }
 
+    // chiude torneo e vinvitori
     private function closeTournament(): void {
         $t = Tournament::find($this->tournament_id);
         if ($t) {

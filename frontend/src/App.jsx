@@ -10,7 +10,7 @@ function App() {
     <BrowserRouter>
       <div className="min-h-screen bg-zinc-950 text-zinc-200">
 
-        {/* NAVBAR */}
+        {/* menu */}
         <nav className="bg-zinc-900 border-b border-zinc-800 backdrop-blur">
           <div className="max-w-6xl mx-auto px-4 py-3 flex gap-3">
             <NavLink to="/dashboard"
@@ -46,7 +46,7 @@ function App() {
           </div>
         </nav>
 
-        {/* PAGINE */}
+        {/* pag */}
         <main className="max-w-6xl mx-auto px-4 py-6">
           <Routes>
             <Route path="/" element={<Navigate to="/dashboard" replace />} />

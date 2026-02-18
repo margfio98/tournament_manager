@@ -8,6 +8,7 @@ use App\Utils\Request;
 
 final class TournamentController
 {
+    // lista tornei
     public function index(): void
     {
         $tournaments = array_map(function ($t) {
@@ -20,7 +21,7 @@ final class TournamentController
         }, Tournament::all());
         Response::success($tournaments)->send();
     }
-
+    // dett torneo + match
     public function show(int $id): void
     {
         $tournament = Tournament::find($id);
@@ -28,14 +29,16 @@ final class TournamentController
             Response::error("Torneo non trovato", 404)->send();
         }
         $out = $tournament->toArray();
+        // aggiunge winner_pl se c'e
         if (!empty($tournament->winner_player_id)) {
             $winner = \App\Models\Player::find($tournament->winner_player_id);
             $out['winner_name'] = $winner ? $winner->getFullName() : null;
         }
+        // m
         $out['matches'] = array_map(fn($m) => $m->toArray(), \App\Models\MatchModel::byTournament($tournament->id));
         Response::success($out)->send();
     }
-
+    // crea torneo + pl + bracket POST
     public function store(): void
     {
         $data = (new Request())->json();
@@ -43,12 +46,12 @@ final class TournamentController
         if (empty($data['name'])) {
             Response::error("Il nome del torneo è obbligatorio", 400)->send();
         }
-
+        // almeno due
         $playerIds = $data['player_ids'] ?? [];
         if (empty($playerIds) || count($playerIds) < 2) {
             Response::error("Seleziona almeno 2 partecipanti (4, 8 o 16 consigliati)", 400)->send();
         }
-
+        // nuovo torneo ongoing
         $tournament = new Tournament([
             'name' => $data['name'],
             'start_date' => $data['start_date'] ?? null,
@@ -57,6 +60,7 @@ final class TournamentController
         $tournament->status = 'ongoing';
         $tournament->save();
 
+        //ins pl
         foreach ($playerIds as $pid) {
             \App\Database\DB::execute(
                 "INSERT INTO tournament_participants (tournament_id, player_id) VALUES (?, ?)",
@@ -64,6 +68,7 @@ final class TournamentController
             );
         }
 
+        // genera bracjet
         try {
             BracketService::generate($tournament->id, array_map('intval', $playerIds));
         } catch (\InvalidArgumentException $e) {
@@ -79,6 +84,7 @@ final class TournamentController
         Response::success($out, 201)->send();
     }
 
+    // mod torneo
     public function update(int $id): void
     {
         $tournament = Tournament::find($id);

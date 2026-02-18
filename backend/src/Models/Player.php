@@ -2,7 +2,7 @@
 namespace App\Models;
 
 /**
- * Modello gestione giocatori
+ * gestione giocatori
  */
 final class Player extends BaseModel {
     protected static string $table = 'players';

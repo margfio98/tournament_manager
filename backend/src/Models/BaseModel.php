@@ -13,11 +13,13 @@ abstract class BaseModel {
         foreach ($data as $k => $v) { if (property_exists($this, $k)) $this->$k = $v; }
         return $this;
     }
-
+// static:: x mod riutilizzabile da altri mod figlio (classe che loc hiama) 
+    // self:: classe corrente; static:: classe che chisma il metodfo; //new static:: crae ogg classe figlia
+    
     public static function all(): array {
         $pk = static::$primaryKey ?? 'id';
         $rows = DB::select("SELECT * FROM " . static::$table . " ORDER BY `$pk` DESC");
-        return array_map(fn($r) => new static($r), $rows);
+        return array_map(fn($r) => new static($r), $rows); 
     }
 
     public static function find(int $id): ?static {

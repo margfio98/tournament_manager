@@ -54,7 +54,7 @@ final class PlayerController
             Response::error("Giocatore non trovato", 404)->send();
         }
 
-        // Vincolo integrità: non eliminare se ha partecipato a tornei
+        // vincolo non eliminare se ha giocato
         $partecipations = \App\Database\DB::select(
             "SELECT 1 FROM tournament_participants WHERE player_id = ? LIMIT 1",
             [$id]
