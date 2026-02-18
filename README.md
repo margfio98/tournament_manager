@@ -74,6 +74,9 @@ tournament_manager
 ```bash
 mysql -u root -p tournament_manager < database/tournament_manager_dump.sql
 ```
+Configurare credenziali MySql. Aprire il file:
+backend/config/database.php
+e inserire la propria password MySQL
 
 ---
 
